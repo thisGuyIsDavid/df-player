@@ -13,7 +13,6 @@ class DFPlayer:
     def set_up(self):
         self.stop_playback()
         self.set_volume()
-        self.play_track(1)
         time.sleep(10)
         self.is_playing()
 
