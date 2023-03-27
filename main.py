@@ -13,7 +13,7 @@ class DFPlayer:
     def set_up(self):
         self.stop_playback()
         self.set_volume()
-        self.play_track(random.randint(1, 158))
+        self.play_track(1)
         time.sleep(10)
         self.is_playing()
 
@@ -27,6 +27,7 @@ class DFPlayer:
                 two_characters = single_message[x*2:(x*2) + 2]
                 if two_characters != '':
                     single_message_array.append(single_message[x*2:(x*2) + 2])
+            print('convert_dfplayer_response_to_hex', single_message_array)
             return single_message_array
 
     @staticmethod
@@ -61,6 +62,7 @@ class DFPlayer:
     def send_command(self, command_type, parameter_one, parameter_two, return_feedback=False):
         generated_command = self.generate_command(command_type, parameter_one, parameter_two, return_feedback)
         self.serial.write(generated_command)
+        print(generated_command)
         if not return_feedback:
             return
         time.sleep(0.05)
@@ -81,7 +83,6 @@ class DFPlayer:
 
     def is_playing(self):
         result = self.send_command(0x42, 0x00, 0x00, return_feedback=True)
-        print(result)
 
 
 if __name__ == '__main__':
