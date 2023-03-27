@@ -13,8 +13,7 @@ class DFPlayer:
     def set_up(self):
         self.stop_playback()
         self.set_volume()
-        time.sleep(10)
-        self.is_playing()
+        time.sleep(1)
 
     @staticmethod
     def convert_dfplayer_response_to_hex(received_bytes):
@@ -82,7 +81,6 @@ class DFPlayer:
 
     def is_playing(self):
         result = self.send_command(0x42, 0x00, 0x00, return_feedback=True)
-
 
 if __name__ == '__main__':
     serial_music_player = DFPlayer(queue=None).play_track(str(1))
