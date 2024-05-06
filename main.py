@@ -74,7 +74,8 @@ class DFPlayer:
         self.send_command(0x06, 0x00, int(volume_level))
 
     def play_track(self, track_number):
-        self.send_command(0x12, 0x00, int(track_number))
+        response = self.send_command(0x12, 0x00, int(track_number))
+        print(response)
 
     def play_blank_space(self):
         pass
