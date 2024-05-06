@@ -11,7 +11,7 @@ class DFPlayer:
         self.set_up()
 
     def set_up(self):
-        self.stop_playback()
+        self.reset_module()
         self.set_volume()
         time.sleep(1)
 
@@ -67,8 +67,12 @@ class DFPlayer:
         message = self.serial.readline()
         return self.convert_dfplayer_response_to_hex(message)
 
+    def reset_module(self):
+        self.send_command(0x05, 0x00, 0x00)
+
     def stop_playback(self):
-        self.send_command(0x16, 0x00, 0x00)
+        self.send_command(0x1B, 0x00, 0x00)
+        time.sleep(1)
 
     def set_volume(self, volume_level=15):
         self.send_command(0x06, 0x00, int(volume_level))
@@ -85,5 +89,5 @@ class DFPlayer:
 if __name__ == '__main__':
     serial_music_player = DFPlayer(queue=None)
     serial_music_player.is_playing()
-    serial_music_player.play_track(str(1))
+    #   serial_music_player.play_track(str(1))
     serial_music_player.is_playing()
