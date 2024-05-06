@@ -63,7 +63,7 @@ class DFPlayer:
         print('sent command', generated_command)
         if not return_feedback:
             return
-        time.sleep(0.05)
+        time.sleep(0.1)
         message = self.serial.readline()
         return self.convert_dfplayer_response_to_hex(message)
 
@@ -75,14 +75,12 @@ class DFPlayer:
 
     def play_track(self, track_number):
         response = self.send_command(0x12, 0x00, int(track_number), return_feedback=True)
-        print(response)
 
     def play_blank_space(self):
         pass
 
     def is_playing(self):
         result = self.send_command(0x42, 0x00, 0x00, return_feedback=True)
-        print(result)
 
 if __name__ == '__main__':
     serial_music_player = DFPlayer(queue=None)
