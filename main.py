@@ -74,7 +74,7 @@ class DFPlayer:
         self.send_command(0x06, 0x00, int(volume_level))
 
     def play_track(self, track_number):
-        response = self.send_command(0x12, 0x00, int(track_number))
+        response = self.send_command(0x12, 0x00, int(track_number), return_feedback=True)
         print(response)
 
     def play_blank_space(self):
@@ -86,5 +86,6 @@ class DFPlayer:
 
 if __name__ == '__main__':
     serial_music_player = DFPlayer(queue=None)
+    serial_music_player.is_playing()
     serial_music_player.play_track(str(1))
     serial_music_player.is_playing()
