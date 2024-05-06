@@ -60,7 +60,7 @@ class DFPlayer:
     def send_command(self, command_type, parameter_one, parameter_two, return_feedback=False):
         generated_command = self.generate_command(command_type, parameter_one, parameter_two, return_feedback)
         self.serial.write(generated_command)
-        print(generated_command)
+        print('sent command', generated_command)
         if not return_feedback:
             return
         time.sleep(0.05)
