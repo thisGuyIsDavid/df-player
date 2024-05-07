@@ -11,14 +11,8 @@ class DFPlayer:
         self.set_up()
 
     def set_up(self):
-        self.send_command(0x42, 0x00, 0x00, return_feedback=True)
-        for i in range(0, 30, 5):
-            self.set_volume(i)
-            time.sleep(1)
-            self.send_query(0x43)
-        return
-
         self.set_module_to_normal()
+        return
         self.stop_playback()
         time.sleep(5)
         self.set_volume()
@@ -38,32 +32,23 @@ class DFPlayer:
 
     @staticmethod
     def generate_command(command_one, parameter_1, parameter_2, feedback=False):
-        """
-        DFPlayer requires a special command set.
-        Found though https://github.com/DFRobot/DFRobotDFPlayerMini/blob/master/doc/FN-M16P%2BEmbedded%2BMP3%2BAudio%2BModule%2BDatasheet.pdf
-        :param command_one: Hexadecimal command for DF Player.
-        :param parameter_1: Command param from above URL.
-        :param parameter_2: Command param from above URL.
-        :param feedback: whether to ask DFPlayer for response.
-        :return: DFPlayer compatible code.
-        """
-
-        start_byte = 0x7E
-        version_byte = 0xFF
-        command_length = 0x06
-        end_byte = 0xEF
-        feedback = 0x01 if feedback else 0x00
-
-        #   generate checksum.
-        checksum = 65535 + -(version_byte + command_length + command_one + feedback + parameter_1 + parameter_2) + 1
-
-        #   checksum is the high byte and low bite of the checksum.
-        high_byte, low_byte = divmod(checksum, 0x100)
-
-        array_of_bytes = [start_byte, version_byte, command_length, command_one, feedback, parameter_1, parameter_2, high_byte, low_byte, end_byte]
-        print('byte array', array_of_bytes)
-        command_bytes = bytes(array_of_bytes)
-        return command_bytes
+        out_bytes = bytearray(10)
+        out_bytes[0]=126
+        out_bytes[1]=255
+        out_bytes[2]=6
+        out_bytes[3]=command_one
+        out_bytes[4]=0
+        out_bytes[5]=parameter_1
+        out_bytes[6]=parameter_2
+        out_bytes[9]=239
+        checksum = 0
+        for i in range(1,7):
+            checksum=checksum+out_bytes[i]
+        out_bytes[7]=(checksum>>7)-1
+        out_bytes[7]=~out_bytes[7]
+        out_bytes[8]=checksum-1
+        out_bytes[8]=~out_bytes[8]
+        return out_bytes
 
     def send_command(self, command_type, parameter_one, parameter_two, return_feedback=False):
         generated_command = self.generate_command(command_type, parameter_one, parameter_two, return_feedback)
