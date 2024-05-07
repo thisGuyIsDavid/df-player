@@ -12,7 +12,7 @@ class DFPlayer:
 
     def set_up(self):
         self.send_command(0x42, 0x00, 0x00, return_feedback=True)
-        for i in range(0, 30, 5):
+        for i in range(5, 30, 5):
             self.set_volume(i)
             time.sleep(1)
             self.send_query(0x43)
