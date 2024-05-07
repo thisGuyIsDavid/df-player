@@ -12,10 +12,8 @@ class DFPlayer:
 
     def set_up(self):
         self.stop_playback()
-        #   self.reset_module()
-        time.sleep(1)
+        self.set_module_to_normal()
         self.set_volume()
-        time.sleep(1)
 
     @staticmethod
     def convert_dfplayer_response_to_hex(received_bytes):
@@ -69,8 +67,8 @@ class DFPlayer:
         message = self.serial.readline()
         return self.convert_dfplayer_response_to_hex(message)
 
-    def reset_module(self):
-        self.send_command(0x0C, 0x00, 0x00, return_feedback=True)
+    def set_module_to_normal(self):
+        self.send_command(0x0B, 0x00, 0x00, return_feedback=True)
 
     def start_module(self):
         self.send_command(0x0D, 0x00, 0x00)
