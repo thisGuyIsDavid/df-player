@@ -11,9 +11,12 @@ class DFPlayer:
         self.set_up()
 
     def set_up(self):
+        self.send_command(0x42, 0x00, 0x00)
+        return
+
         self.set_module_to_normal()
-        time.sleep(5)
         self.stop_playback()
+        time.sleep(5)
         self.set_volume()
 
     @staticmethod
@@ -92,4 +95,4 @@ class DFPlayer:
 
 if __name__ == '__main__':
     serial_music_player = DFPlayer(queue=None)
-    serial_music_player.play_track(str(1))
+    #   serial_music_player.play_track(str(1))
