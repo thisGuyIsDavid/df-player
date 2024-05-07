@@ -12,6 +12,19 @@ class DFPlayer:
 
     def set_up(self):
         self.send_command(0x42, 0x00, 0x00)
+
+        self.set_volume(1)
+        time.sleep(1)
+        self.send_command(0x43, 0x00, 0x00)
+        time.sleep(1)
+        self.set_volume(15)
+        time.sleep(1)
+        self.send_command(0x44, 0x00, 0x00)
+        time.sleep(1)
+        self.set_volume(30)
+        time.sleep(1)
+        self.send_command(0x45, 0x00, 0x00)
+
         return
 
         self.set_module_to_normal()
@@ -82,6 +95,7 @@ class DFPlayer:
         time.sleep(1)
 
     def set_volume(self, volume_level=15):
+        print('set volume', volume_level)
         self.send_command(0x06, 0x00, int(volume_level))
 
     def play_track(self, track_number):
