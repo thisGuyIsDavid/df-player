@@ -78,6 +78,7 @@ class DFPlayer:
     def send_query(self, command_type):
         generated_command = self.generate_command(command_type, 0x00, 0x00, True)
         self.serial.write(generated_command)
+        time.sleep(0.1)
         print('sent command', generated_command)
         message = self.serial.readline()
         response = self.convert_dfplayer_response_to_hex(message)
