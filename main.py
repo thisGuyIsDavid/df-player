@@ -78,9 +78,7 @@ class DFPlayer:
             self.send_command(command_type, 0x00, 0x00, True)
             time.sleep(0.05)
             in_bytes = self.serial.read()
-            print(in_bytes)
-            if not in_bytes:
-                return -1
+            print('in bytes', in_bytes)
 
         return
         for i in range(10):
