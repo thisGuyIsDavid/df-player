@@ -12,7 +12,7 @@ class DFPlayer:
 
     def set_up(self):
         self.send_command(0x42, 0x00, 0x00, return_feedback=True)
-        for i in range(0, 30):
+        for i in range(0, 30, 5):
             self.set_volume(i)
             time.sleep(1)
             self.send_query(0x43)
@@ -61,14 +61,13 @@ class DFPlayer:
         high_byte, low_byte = divmod(checksum, 0x100)
 
         array_of_bytes = [start_byte, version_byte, command_length, command_one, feedback, parameter_1, parameter_2, high_byte, low_byte, end_byte]
-
+        print('byte array', array_of_bytes)
         command_bytes = bytes(array_of_bytes)
         return command_bytes
 
     def send_command(self, command_type, parameter_one, parameter_two, return_feedback=False):
         generated_command = self.generate_command(command_type, parameter_one, parameter_two, return_feedback)
         self.serial.write(generated_command)
-        print('sent command', generated_command)
         if not return_feedback:
             return
         time.sleep(0.1)
