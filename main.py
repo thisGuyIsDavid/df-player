@@ -72,10 +72,12 @@ class DFPlayer:
 
     def send_query(self, command_type):
         self.send_command(command_type, 0x00, 0x00, True)
-        time.sleep(1)
-        message = self.serial.readline()
-        response = self.convert_dfplayer_response_to_hex(message)
-        print('Response', response)
+        time.sleep(0.1)
+        for i in range(10):
+            message = self.serial.readline()
+            response = self.convert_dfplayer_response_to_hex(message)
+            print('Response', response)
+            time.sleep(0.1)
         #   return self.convert_dfplayer_response_to_hex(message)
 
 
