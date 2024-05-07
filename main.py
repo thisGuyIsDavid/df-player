@@ -88,15 +88,10 @@ class DFPlayer:
         generated_command = self.generate_command(command_type, 0x00, 0x00, True)
         self.serial.write(generated_command)
         print('sent command', generated_command)
-        print(self.serial.read())
-        time.sleep(0.01)
-        print(self.serial.read())
-        time.sleep(0.01)
-        print(self.serial.read())
-        time.sleep(0.01)
-        return
         message = self.serial.readline()
-        return self.convert_dfplayer_response_to_hex(message)
+        response = self.convert_dfplayer_response_to_hex(message)
+        print('got response', response)
+        #   return self.convert_dfplayer_response_to_hex(message)
 
 
     def set_module_to_normal(self):
