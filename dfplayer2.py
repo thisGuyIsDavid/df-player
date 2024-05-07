@@ -11,7 +11,7 @@ class DFPlayer:
         self.set_up()
 
     def set_up(self):
-        self.set_module_to_normal()
+        self.stop_playback()
         return
         self.stop_playback()
         time.sleep(5)
@@ -64,6 +64,8 @@ class DFPlayer:
             print('Response', response)
             time.sleep(0.1)
 
+    def stop_playback(self):
+        self.send_command(22, 0, 0)
 
     def set_module_to_normal(self):
         self.send_command(0x0b, 0x00, 0x00, return_feedback=True)
@@ -71,9 +73,7 @@ class DFPlayer:
     def start_module(self):
         self.send_command(0x0D, 0x00, 0x00)
 
-    def stop_playback(self):
-        self.send_command(0x16, 0x00, 0x00)
-        time.sleep(1)
+
 
     def set_volume(self, volume_level=15):
         print('set volume', volume_level)
