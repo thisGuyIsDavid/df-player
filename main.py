@@ -67,21 +67,15 @@ class DFPlayer:
 
     def send_command(self, command_type, parameter_one, parameter_two, return_feedback=False):
         generated_command = self.generate_command(command_type, parameter_one, parameter_two, return_feedback)
+        print('Sending', generated_command)
         self.serial.write(generated_command)
-        if not return_feedback:
-            return
-        time.sleep(0.1)
-        message = self.serial.readline()
-        return self.convert_dfplayer_response_to_hex(message)
 
     def send_query(self, command_type):
-        generated_command = self.generate_command(command_type, 0x00, 0x00, True)
-        self.serial.write(generated_command)
-        time.sleep(0.1)
-        print('sent command', generated_command)
+        self.send_command(command_type, 0x00, 0x00, True)
+        time.sleep(1)
         message = self.serial.readline()
         response = self.convert_dfplayer_response_to_hex(message)
-        print('got response', response)
+        print('Response', response)
         #   return self.convert_dfplayer_response_to_hex(message)
 
 
