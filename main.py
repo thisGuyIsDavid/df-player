@@ -61,7 +61,6 @@ class DFPlayer:
         high_byte, low_byte = divmod(checksum, 0x100)
 
         array_of_bytes = [start_byte, version_byte, command_length, command_one, feedback, parameter_1, parameter_2, high_byte, low_byte, end_byte]
-        print('byte array', array_of_bytes)
         command_bytes = bytes(array_of_bytes)
         return command_bytes
 
@@ -75,7 +74,7 @@ class DFPlayer:
         retry = True
         for i in range(100):
             self.serial.flush()
-            self.send_command(command_type, 0x00, 0x00, True)
+            self.send_command(command_type, 0x00, 0x00, False)
             time.sleep(0.5)
             in_bytes = self.serial.read()
             print('in bytes', in_bytes)
