@@ -88,10 +88,8 @@ class DFPlayer:
         pass
 
     def is_playing(self):
-        result = self.send_command(0x42, 0x00, 0x00, return_feedback=True)
+        result = self.send_command(0x42, 0x00, 0x00)
 
 if __name__ == '__main__':
     serial_music_player = DFPlayer(queue=None)
-    serial_music_player.is_playing()
     serial_music_player.play_track(str(1))
-    serial_music_player.is_playing()
