@@ -11,7 +11,8 @@ class DFPlayer:
         self.set_up()
 
     def set_up(self):
-        self.reset_module()
+        self.stop_playback()
+        #   self.reset_module()
         time.sleep(1)
         self.set_volume()
         time.sleep(1)
