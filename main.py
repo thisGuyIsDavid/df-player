@@ -83,7 +83,6 @@ class DFPlayer:
                 return -1
 
         return
-            pass
         for i in range(10):
             message = self.serial.read()
             print('Message', message)
