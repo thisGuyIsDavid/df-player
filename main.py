@@ -71,6 +71,7 @@ class DFPlayer:
         self.serial.write(generated_command)
 
     def send_query(self, command_type):
+        self.serial.flush()
         self.send_command(command_type, 0x00, 0x00, True)
         for i in range(10):
             message = self.serial.read()
