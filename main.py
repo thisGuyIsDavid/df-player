@@ -75,9 +75,9 @@ class DFPlayer:
         retry = True
         for i in range(100):
             self.send_command(command_type, 0x00, 0x00, False)
-            time.sleep(0.5)
             in_bytes = self.serial.read()
             print('in bytes', in_bytes)
+            time.sleep(0.5)
 
         return
         for i in range(10):
