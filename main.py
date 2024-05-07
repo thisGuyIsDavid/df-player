@@ -89,6 +89,11 @@ class DFPlayer:
         self.serial.write(generated_command)
         print('sent command', generated_command)
         print(self.serial.read())
+        time.sleep(0.01)
+        print(self.serial.read())
+        time.sleep(0.01)
+        print(self.serial.read())
+        time.sleep(0.01)
         return
         message = self.serial.readline()
         return self.convert_dfplayer_response_to_hex(message)
