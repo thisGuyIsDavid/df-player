@@ -71,14 +71,24 @@ class DFPlayer:
         self.serial.write(generated_command)
 
     def send_query(self, command_type):
-        self.serial.flush()
-        self.send_command(command_type, 0x00, 0x00, True)
+
+        retry = True
+        for i in range(100):
+            self.serial.flush()
+            self.send_command(command_type, 0x00, 0x00, True)
+            time.sleep(0.05)
+            in_bytes = self.serial.read()
+            print(in_bytes)
+            if not in_bytes:
+                return -1
+
+        return
+            pass
         for i in range(10):
             message = self.serial.read()
             print('Message', message)
             response = self.convert_dfplayer_response_to_hex(message)
             print('Response', response)
-            time.sleep(0.1)
 
 
     def set_module_to_normal(self):
