@@ -85,10 +85,11 @@ class DFPlayer:
         return self.convert_dfplayer_response_to_hex(message)
 
     def send_query(self, command_type):
-        generated_command = self.generate_command(command_type, 0x00, 0x00, True)
+        generated_command = self.generate_command(command_type, 0x00, 0x00, False)
         self.serial.write(generated_command)
         print('sent command', generated_command)
         print(self.serial.read())
+        return
         message = self.serial.readline()
         return self.convert_dfplayer_response_to_hex(message)
 
