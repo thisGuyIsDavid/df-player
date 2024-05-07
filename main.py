@@ -15,15 +15,15 @@ class DFPlayer:
 
         self.set_volume(1)
         time.sleep(1)
-        self.send_command(0x43, 0x00, 0x00, return_feedback=True)
+        self.send_query(0x43)
         time.sleep(1)
         self.set_volume(15)
         time.sleep(1)
-        self.send_command(0x43, 0x00, 0x00, return_feedback=True)
+        self.send_query(0x43)
         time.sleep(1)
         self.set_volume(30)
         time.sleep(1)
-        self.send_command(0x43, 0x00, 0x00, return_feedback=True)
+        self.send_query(0x43)
 
         return
 
@@ -83,6 +83,16 @@ class DFPlayer:
         time.sleep(0.1)
         message = self.serial.readline()
         return self.convert_dfplayer_response_to_hex(message)
+
+    def send_query(self, command_type):
+        generated_command = self.generate_command(command_type, 0x00, 0x00, True)
+        self.serial.write(generated_command)
+        print('sent command', generated_command)
+        time.sleep(0.1)
+        print(self.serial.read())
+        message = self.serial.readline()
+        return self.convert_dfplayer_response_to_hex(message)
+
 
     def set_module_to_normal(self):
         self.send_command(0x0b, 0x00, 0x00, return_feedback=True)
