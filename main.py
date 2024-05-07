@@ -69,17 +69,20 @@ class DFPlayer:
         return self.convert_dfplayer_response_to_hex(message)
 
     def reset_module(self):
-        self.send_command(0x0C, 0x00, 0x00)
+        self.send_command(0x0C, 0x00, 0x00, return_feedback=True)
+
+    def start_module(self):
+        self.send_command(0x0D, 0x00, 0x00)
 
     def stop_playback(self):
-        self.send_command(0x1B, 0x00, 0x00)
+        self.send_command(0x16, 0x00, 0x00)
         time.sleep(1)
 
     def set_volume(self, volume_level=15):
         self.send_command(0x06, 0x00, int(volume_level))
 
     def play_track(self, track_number):
-        response = self.send_command(0x12, 0x00, int(track_number), return_feedback=True)
+        self.send_command(0x12, 0x00, int(track_number))
 
     def play_blank_space(self):
         pass
