@@ -1,30 +1,45 @@
 import random
 import time
 import serial
+from gpiozero import LED, Button
 
+class DFPlayerPico():
+    UART_BAUD_RATE=9600
+    UART_BITS=8
+    UART_PARITY=None
+    UART_STOP=1
 
-class DFPlayer:
+    START_BYTE = 0x7E
+    VERSION_BYTE = 0xFF
+    COMMAND_LENGTH = 0x06
 
-    def __init__(self, queue):
-        self.queue = queue
-        self.serial = serial.Serial(port='/dev/ttyS0', baudrate=9600, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE, bytesize=serial.EIGHTBITS, timeout=5)
-        self.set_up()
+    ACKNOWLEDGE = 0x01
+    END_BYTE = 0xEF
+    COMMAND_LATENCY =   500
 
-    def set_up(self):
-        self.send_command(0x42, 0x00, 0x00, return_feedback=True)
-        for i in range(5, 30, 5):
-            self.set_volume(i)
-            time.sleep(1)
-            self.send_query(0x43)
-        return
+    def __init__(self):
+        self.playerBusy = Button(23)
+        self.uart = serial.Serial(port='/dev/ttyS0', baudrate=9600, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE, bytesize=serial.EIGHTBITS, timeout=5)
 
-        self.set_module_to_normal()
-        self.stop_playback()
-        time.sleep(5)
-        self.set_volume()
+    def split(self, num):
+        return num >> 8, num & 0xFF
+
+    def send_cmd(self, command, parameter1, parameter2):
+        checksum = -(self.VERSION_BYTE + self.COMMAND_LENGTH + command + self.ACKNOWLEDGE + parameter1 + parameter2)
+        highByte, lowByte = self.split(checksum)
+        toSend = bytes([b & 0xFF for b in [self.START_BYTE, self.VERSION_BYTE, self.COMMAND_LENGTH, command, self.ACKNOWLEDGE,parameter1, parameter2, highByte, lowByte, self.END_BYTE]])
+        self.uart.write(toSend)
+        time.sleep(self.COMMAND_LATENCY)
+        return self.uart.read()
+
+    def send_query(self, command, parameter_1 = 0x00, parameter_2 = 0x00):
+        response = self.send_cmd(command, parameter_1, parameter_2)
+        return self.convert_dfplayer_response_to_hex(response)
 
     @staticmethod
     def convert_dfplayer_response_to_hex(received_bytes):
+        if received_bytes is None:
+            return
         converted_string = received_bytes.hex()
         for i in range(int(len(converted_string) / 20)):
             single_message = converted_string[i*20: (i*20) + 20]
@@ -33,83 +48,74 @@ class DFPlayer:
                 two_characters = single_message[x*2:(x*2) + 2]
                 if two_characters != '':
                     single_message_array.append(single_message[x*2:(x*2) + 2])
-            print('convert_dfplayer_response_to_hex', single_message_array)
             return single_message_array
 
-    @staticmethod
-    def generate_command(command_one, parameter_1, parameter_2, feedback=False):
-        """
-        DFPlayer requires a special command set.
-        Found though https://github.com/DFRobot/DFRobotDFPlayerMini/blob/master/doc/FN-M16P%2BEmbedded%2BMP3%2BAudio%2BModule%2BDatasheet.pdf
-        :param command_one: Hexadecimal command for DF Player.
-        :param parameter_1: Command param from above URL.
-        :param parameter_2: Command param from above URL.
-        :param feedback: whether to ask DFPlayer for response.
-        :return: DFPlayer compatible code.
-        """
+    def is_busy(self):
+        return True
+        return not self.playerBusy.value()
 
-        start_byte = 0x7E
-        version_byte = 0xFF
-        command_length = 0x06
-        end_byte = 0xEF
-        feedback = 0x01 if feedback else 0x00
+    #Common DFPlayer control commands
+    def next_track(self):
+        self.send_cmd(0x01, 0x00, 0x00)
 
-        #   generate checksum.
-        checksum = 65535 + -(version_byte + command_length + command_one + feedback + parameter_1 + parameter_2) + 1
+    def prev_track(self):
+        self.send_cmd(0x02, 0x00, 0x00)
 
-        #   checksum is the high byte and low bite of the checksum.
-        high_byte, low_byte = divmod(checksum, 0x100)
+    def set_volume(self, volume):
+        #Volume can be between 0-30
+        self.send_cmd(0x06, 0x00, volume)
 
-        array_of_bytes = [start_byte, version_byte, command_length, command_one, feedback, parameter_1, parameter_2, high_byte, low_byte, end_byte]
-        command_bytes = bytes(array_of_bytes)
-        return command_bytes
-
-    def send_command(self, command_type, parameter_one, parameter_two, return_feedback=False):
-        generated_command = self.generate_command(command_type, parameter_one, parameter_two, return_feedback)
-        print('Sending', generated_command)
-        self.serial.write(generated_command)
-
-    def send_query(self, command_type):
-        self.serial.flush()
-
-        retry = True
-        self.send_command(command_type, 0x00, 0x00, False)
-        for i in range(5):
-            in_bytes = self.serial.read()
-            print('in bytes', in_bytes)
-            time.sleep(0.5)
-
-        return
-        for i in range(10):
-            message = self.serial.read()
-            print('Message', message)
-            response = self.convert_dfplayer_response_to_hex(message)
-            print('Response', response)
+    def get_volume_level(self):
+        converted_response = self.send_query(0x43, 0x00, 0x00)
+        if converted_response is not None:
+            return converted_response[6]
 
 
-    def set_module_to_normal(self):
-        self.send_command(0x0b, 0x00, 0x00, return_feedback=True)
+    def set_eq(self, eq):
+        self.send_cmd(0x07, 0x00, eq)
 
-    def start_module(self):
-        self.send_command(0x0D, 0x00, 0x00)
+    def set_playback_mode(self, mode):
+        #Mode can be 0-3
+        #0=Repeat
+        #1=Folder Repeat
+        #2=Single Repeat
+        #3=Random
+        self.send_cmd(0x08, 0x00, mode)
 
-    def stop_playback(self):
-        self.send_command(0x16, 0x00, 0x00)
-        time.sleep(1)
+    def set_playback_source(self, source):
+        self.send_cmd(0x09, 0x00, source)
 
-    def set_volume(self, volume_level=15):
-        print('set volume', volume_level)
-        self.send_command(0x06, 0x00, int(volume_level))
+    def standby(self):
+        self.send_cmd(0x0A, 0x00, 0x00)
 
-    def play_track(self, track_number):
-        self.send_command(0x12, 0x00, int(track_number))
+    def set_normal_working(self):
+        self.send_cmd(0x0B, 0x00, 0x00)
 
-    def play_blank_space(self):
-        pass
+    def reset(self):
+        self.send_cmd(0x0C, 0x00, 0x00)
 
-    def is_playing(self):
-        result = self.send_command(0x42, 0x00, 0x00)
+    def resume(self):
+        self.send_cmd(0x0D, 0x00, 0x00)
+
+    def pause(self):
+        self.send_cmd(0x0E, 0x00, 0x00)
+
+    def play_track(self, folder, file):
+        self.send_cmd(0x0F, folder, file)
+
+    def play_mp3(self, filenum):
+        a = (filenum >> 8) & 0xff
+        b = filenum & 0xff
+        return self.send_cmd(0x12, a, b)
+
+    #Query System Parameters
+    def init(self, params):
+        self.send_cmd(0x3F, 0x00, params)
+
+
+
+
 
 if __name__ == '__main__':
-    serial_music_player = DFPlayer(queue=None)
+    serial_music_player = DFPlayerPico()
     #   serial_music_player.play_track(str(1))
